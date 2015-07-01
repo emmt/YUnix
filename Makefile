@@ -17,10 +17,10 @@ TGT=$(DEFAULT_TGT)
 
 # ------------------------------------------------ macros for this package
 
-PKG_NAME=ioctl
-PKG_I=${srcdir}/ioctl.i
+PKG_NAME=yor_unix
+PKG_I=${srcdir}/unix.i
 
-OBJS=yioctl.o
+OBJS=yor_unix.o
 
 # change to give the executable a name other than yorick
 PKG_EXENAME=yorick
@@ -46,7 +46,7 @@ PKG_I_START=
 PKG_I_EXTRA=
 
 RELEASE_FILES = AUTHORS LICENSE.md Makefile NEWS README.md TODO \
-	configure ioctl.i yioctl.c
+	configure unix.i yor_unix.c
 RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
 # -------------------------------- standard targets and rules (in Makepkg)
