@@ -14,6 +14,8 @@
 
 require, "unix.i";
 
+if (sizeof(int) != 4) error, "this code assume int is 32-bit integer";
+
 /*---------------------------------------------------------------------------*/
 /* IOCTL CODES */
 
@@ -61,39 +63,54 @@ write, format="BNS_SLM_STOP           = 0x%08x\n", BNS_SLM_STOP;
 local _BNS_SLM_FD;              // current file descriptor
 _BNS_SLM_DEV = "/dev/bns_slm0"; // default device name
 func bns_slm_open(dev)
+/* DOCUMENT bns_slm_open;
+         or bns_slm_open, dev;
+
+     Open (or re-open) BNS SLM device.  The path to the device may be
+     specified by argument DEV.  A default device is used if DEV is
+     omitted.
+
+     Currently a single BNS SLM device can be used at a time.
+
+   SEE ALSO: bns_slm_send_image.
+ */
 {
+  // Open the device
   extern _BNS_SLM_FD;
   if (is_void(dev)) dev = _BNS_SLM_DEV;
   _BNS_SLM_FD = unx_open(dev, UNX_O_RDWR);
 
-  local int32_t;
-  if (sizeof(int) == 4) int32_t = int;
-  else if (sizeof(long) == 4) int32_t = long;
-  else error, "no integer type found for 32-bit integer";
-
-  // Set crystal type 0 = FLC, 1 = Nematic
-  buf = [int32_t(0)];
-  unx_ioctl(_BNS_SLM_FD, BNS_SLM_SET_LC_TYPE, buf);
+  // Set crystal type (0 = FLC, 1 = Nematic)
+  buf = [int(0)];
+  unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_LC_TYPE, buf;
 
   // Set frame rate
-  buf = [int32_t(0x00040008)];
-  unx_ioctl(_BNS_SLM_FD, BNS_SLM_SET_FRAME_RATE, buf);
+  buf = [int(0x00040008)];
+  unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_FRAME_RATE, buf;
 
   // Start with an empty image
-  z = array(char, 512, 512);
-  bns_slm_send_image(lut, z);
+  bns_slm_send_image, array(char, 512, 512);
 }
 
-func bns_slm_send_image(lut, img)
+func bns_slm_send_image(img)
+/* DOCUMENT bns_slm_send_image, img;
+
+     Set the shape of the BNS SLM mirror.  IMG is a 512x512 array of char.
+     The BNS SLM device is automatically open (with a default device name)
+     if not yet done.  You may directly call bns_slm_open to use a
+     different device.
+
+   SEE ALSO: bns_slm_open
+ */
 {
   extern _BNS_SLM_FD;
   if (is_void(_BNS_SLM_FD) || _BNS_SLM_FD.number < 0) {
     bns_slm_open;
   }
-
-  data = lut(image);
-  buf = array.array('B', image.tostring()); //FIXME:
-  unx_ioctl(_BNS_SLM_FD, BNS_SLM_WRITE_IMAGE, buf);
+  if (structof(img) != char || numberof(img) != 0x40000) {
+    error, "bad image type or size";
+  }
+  unx_ioctl, _BNS_SLM_FD, BNS_SLM_WRITE_IMAGE, img;
 }
 
 /*
