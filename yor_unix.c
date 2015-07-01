@@ -247,21 +247,17 @@ Y_unx_ioctl(int argc)
   unsigned long request;
   void* data;
   long ntot;
-  long dims[Y_DIMSIZE];
   int retval, type;
 
   if (argc != 3) y_error("expecting exactly 3 arguments");
   obj = fetch_file_descriptor(argc - 1, TRUE);
   request = (unsigned long)ygets_l(argc - 2);
-  data = (void*)ygeta_any(argc - 2, &ntot, dims, &type);
+  data = (void*)ygeta_any(argc - 2, &ntot, NULL, &type);
   retval = ioctl(obj->fd, request, data);
-  if (yarg_subroutine()) {
-    if (retval == -1) {
-      y_error(strerror(errno));
-    }
-  } else {
-    ypush_int(retval);
+  if (retval == -1 && yarg_subroutine()) {
+    y_error(strerror(errno));
   }
+  ypush_int(retval);
 }
 
 void
@@ -277,13 +273,10 @@ Y_unx_lseek(int argc)
   offset = ygets_l(argc - 2);
   whence = ygets_i(argc - 3);
   retval = lseek(obj->fd, offset, whence);
-  if (yarg_subroutine()) {
-    if (retval == (off_t)-1) {
-      y_error(strerror(errno));
-    }
-  } else {
-    ypush_long(retval);
+  if (retval == (off_t)-1 && yarg_subroutine()) {
+    y_error(strerror(errno));
   }
+  ypush_long(retval);
 }
 
 static void
