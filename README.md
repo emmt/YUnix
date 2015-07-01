@@ -13,8 +13,8 @@ Similarly, the names of the macros and constants are prefixed by `UNX_`.
 For instance:
 ```C
 #include "unix.i"
-f = unx_open(filename, UNX_O_RDONLY)
-loc = unx_lseek(l, off, UNX_SEEK_CUR);
+fd = unx_open(filename, UNX_O_RDONLY)
+loc = unx_lseek(fd, off, UNX_SEEK_CUR);
 ```
 
 Error Management
