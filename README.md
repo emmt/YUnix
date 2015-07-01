@@ -1,7 +1,43 @@
-ioctl
-======
+YUnix
+=====
 
-Yorick plug-in for low-level control.
+Yorick plug-in to access low level i/o Unix functions like `open`, `ioctl`,
+etc.
+
+Names
+-----
+As a general rule, the names of the functions provided by the plug-in are
+the name of the corresponding functions in the C library prefixed by `unx_`.
+Similarly, the names of the macros and constants are prefixed by `UNX_`.
+
+For instance:
+```C
+#include "unix.i"
+f = unx_open(filename, UNX_O_RDONLY)
+loc = unx_lseek(l, off, UNX_SEEK_CUR);
+```
+
+Error Management
+----------------
+
+Dealing with errors depends whether a low level routine is called as a
+Yorick function or as a Yorick subroutine:
+
+* When called as a **Yorick function**, the returned value is the same at
+  the one returned by the C counterpart.  Most low-level C functions return
+  a value which can be used to figure out whether an error occured.  For
+  instance `0` in case of success and `-1` in case of failure.  It is the
+  responsability of the caller to check the returned value.  If an error
+  occured, the function `unx_errno` can be called to retrieve the last
+  error code and the function `unx_strerror` can be used to get an
+  explanatory message about the last error code or a given error code.
+
+* When called as a **Yorick subroutine**, any returned value is discarded,
+  thus the implementation will throw an error whenever an error occured.
+
+In any case, when an error occurs at the Yorick level (*e.g.*, a string
+argument is provided whereas an integer is expected), an error is thrown.
+
 
 Installation
 ------------
