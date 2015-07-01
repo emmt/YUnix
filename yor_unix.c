@@ -48,6 +48,9 @@ static long get_size(int type);
 static void push_string(const char* str);
 static void define_int_const(const char* name, int value);
 
+typedef struct _yfd yfd_t;
+static yfd_t*fetch_file_descriptor(int iarg, int check);
+
 /*---------------------------------------------------------------------------*/
 /* PSEUDO-OBJECTS FOR FILE DESCRIPTORS */
 
@@ -55,8 +58,6 @@ static void yfd_free(void*);
 static void yfd_print(void*);
 static void yfd_eval(void*, int);
 static void yfd_extract(void*, char*);
-
-typedef struct _yfd yfd_t;
 
 struct _yfd {
   char* path;
@@ -161,9 +162,14 @@ yfd_extract(void* addr, char* member)
 }
 
 static yfd_t*
-yfd_fetch(int iarg)
+fetch_file_descriptor(int iarg, int check)
 {
-  return (yfd_t*)yget_obj(iarg, &yfd_type);
+  yfd_t* obj = (yfd_t*)yget_obj(iarg, &yfd_type);
+  if (check) {
+    if (! obj->ready) y_error("uninitialized file descriptor object");
+    if (obj->fd < 0)  y_error("file descriptor has been closed");
+  }
+  return obj;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -221,7 +227,7 @@ Y_unx_close(int argc)
   int fd;
 
   if (argc != 1) y_error("expecting exactly one argument");
-  obj = yfd_fetch(0);
+  obj = fetch_file_descriptor(0, FALSE);
   path = obj->path;
   fd = obj->fd;
   obj->ready = FALSE;
@@ -244,13 +250,10 @@ Y_unx_ioctl(int argc)
   long dims[Y_DIMSIZE];
   int retval, type;
 
-  if (argc != 3) y_error("expecting at least 3 arguments");
-  obj = yfd_fetch(argc - 1);
+  if (argc != 3) y_error("expecting exactly 3 arguments");
+  obj = fetch_file_descriptor(argc - 1, TRUE);
   request = (unsigned long)ygets_l(argc - 2);
   data = (void*)ygeta_any(argc - 2, &ntot, dims, &type);
-
-  if (! obj->ready) y_error("uninitialized file descriptor object");
-  if (obj->fd < 0)  y_error("file descriptor has been closed");
   retval = ioctl(obj->fd, request, data);
   if (yarg_subroutine()) {
     if (retval == -1) {
@@ -270,11 +273,9 @@ Y_unx_lseek(int argc)
   int whence;
 
   if (argc != 3) y_error("expecting exactly 3 arguments");
-  obj = yfd_fetch(argc - 1);
+  obj = fetch_file_descriptor(argc - 1, TRUE);
   offset = ygets_l(argc - 2);
   whence = ygets_i(argc - 3);
-  if (! obj->ready) y_error("uninitialized file descriptor object");
-  if (obj->fd < 0)  y_error("file descriptor has been closed");
   retval = lseek(obj->fd, offset, whence);
   if (yarg_subroutine()) {
     if (retval == (off_t)-1) {
@@ -294,9 +295,7 @@ read_or_write(int argc, int out)
   int type;
 
   if (argc < 2 || argc > 4) y_error("expecting 2 to 4 arguments");
-  obj = yfd_fetch(argc - 1);
-  if (! obj->ready) y_error("uninitialized file descriptor object");
-  if (obj->fd < 0)  y_error("file descriptor has been closed");
+  obj = fetch_file_descriptor(argc - 1, TRUE);
   buf = (unsigned char*)ygeta_any(argc - 2, &ntot, NULL, &type);
   size = get_size(type);
   if (size <= 0) y_error("unsupported data type");
