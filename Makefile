@@ -25,8 +25,6 @@ OBJS=yor_unix.o
 # change to give the executable a name other than yorick
 PKG_EXENAME=yorick
 
-PREFIX=/usr/local
-
 # PKG_DEPLIBS=-Lsomedir -lsomelib   for dependencies of this package
 PKG_DEPLIBS=
 # set compiler (or rarely loader) flags specific to this package
