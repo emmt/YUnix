@@ -112,14 +112,3 @@ func bns_slm_send_image(img)
   }
   unx_ioctl, _BNS_SLM_FD, BNS_SLM_WRITE_IMAGE, img;
 }
-
-/*
- * Local Variables:
- * mode: Yorick
- * tab-width: 8
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * fill-column: 78
- * coding: utf-8
- * End:
- */
