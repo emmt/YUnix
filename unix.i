@@ -256,14 +256,3 @@ extern unx_init;
 
 /* Perform the initialization. */
 unx_init;
-
-/*
- * Local Variables:
- * mode: Yorick
- * tab-width: 8
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * fill-column: 78
- * coding: utf-8
- * End:
- */

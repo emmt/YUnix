@@ -901,15 +901,3 @@ define_int_const(const char* name, int value)
   yput_global(yget_global(name, 0), 0);
   yarg_drop(1);
 }
-
-/*
- * Local Variables:
- * mode: C
- * c-basic-offset: 2
- * tab-width: 8
- * indent-tabs-mode: nil
- * fill-column: 79
- * coding: utf-8
- * ispell-local-dictionary: "american"
- * End:
- */
