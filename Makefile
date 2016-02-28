@@ -39,12 +39,12 @@ EXTRA_PKGS=$(Y_EXE_PKGS)
 PKG_CLEAN=
 
 # autoload file for this package, if any
-PKG_I_START=
+PKG_I_START=${srcdir}/unix-start.i
 # non-pkg.i include files for this package, if any
 PKG_I_EXTRA=
 
 RELEASE_FILES = AUTHORS LICENSE.md Makefile NEWS README.md TODO \
-	configure unix.i yor_unix.c
+	configure unix.i unix-start.i yor_unix.c
 RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
 # -------------------------------- standard targets and rules (in Makepkg)
