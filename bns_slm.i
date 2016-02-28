@@ -8,7 +8,7 @@
  * Copyright (C) 2015: Aurélien Jarno (Python code).
  * Copyright (C) 2015: Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>
  *
- * See LICENSE.md for details.
+ * All rights reserved, see LICENSE.md for details.
  *
  */
 
