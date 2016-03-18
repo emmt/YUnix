@@ -11,8 +11,7 @@ the name of the corresponding functions in the C library prefixed by `unx_`.
 Similarly, the names of the macros and constants are prefixed by `UNX_`.
 
 For instance:
-```C
-#include "unix.i"
+```{.cpp}
 fd = unx_open(filename, UNX_O_RDONLY)
 loc = unx_lseek(fd, off, UNX_SEEK_CUR);
 ```
@@ -57,11 +56,11 @@ configure for building.
 If the plug-in has been properly installed, it is sufficient to use any
 function of YFITSIO to automatically load the plug-in.  You may force the
 loading of the plug-in by something like:
-````{.sh}
+````{.cpp}
 #include "unix.i"
 ````
 or
-````{.sh}
+````{.cpp}
 require, "unix.i";
 ````
 in your code.
