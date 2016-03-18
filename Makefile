@@ -43,7 +43,7 @@ PKG_I_START=${srcdir}/unix-start.i
 # non-pkg.i include files for this package, if any
 PKG_I_EXTRA=
 
-RELEASE_FILES = AUTHORS LICENSE.md Makefile NEWS README.md TODO \
+RELEASE_FILES = AUTHORS LICENSE.md Makefile NEWS README.md \
 	configure unix.i unix-start.i yor_unix.c
 RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
