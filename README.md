@@ -79,7 +79,7 @@ More detailled installation explanations are given below.
    cd $SRC_DIR
    ./configure
    ````
-   To see the configuration options, call:
+   To see the configuration options, type:
    ````{.sh}
    ./configure --help
    ````
@@ -93,17 +93,18 @@ More detailled installation explanations are given below.
    $SRC_DIR/configure
    ````
    where `$SRC_DIR` is the path to the source directory of the plug-in code.
-   To see the configuration options, call:
+   To see the configuration options, type:
    ````{.sh}
    $SRC_DIR/configure --help
    ````
 
 4. Compile the code:
    ````{.sh}
+   make clean
    make
    ````
 
-4. Install the plug-in in Yorick directories:
+5. Install the plug-in in Yorick directories:
    ````{.sh}
    make install
    ````
