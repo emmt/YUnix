@@ -81,7 +81,7 @@ func bns_slm_open(dev)
   _BNS_SLM_FD = unx_open(dev, UNX_O_RDWR);
 
   // Set crystal type (0 = FLC, 1 = Nematic)
-  buf = [int(0)];
+  buf = [int(1)];
   unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_LC_TYPE, buf;
 
   // Set frame rate

@@ -252,7 +252,7 @@ Y_unx_ioctl(int argc)
   if (argc != 3) y_error("expecting exactly 3 arguments");
   obj = fetch_file_descriptor(argc - 1, TRUE);
   request = (unsigned long)ygets_l(argc - 2);
-  data = (void*)ygeta_any(argc - 2, &ntot, NULL, &type);
+  data = (void*)ygeta_any(argc - 3, &ntot, NULL, &type);
   retval = ioctl(obj->fd, request, data);
   if (retval == -1 && yarg_subroutine()) {
     y_error(strerror(errno));
