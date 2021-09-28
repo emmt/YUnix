@@ -113,7 +113,9 @@ func bns_slm_open(dev, lc_type=, frame_rate=)
 func bns_slm_close
 {
     extern _BNS_SLM_FD;
-    _BNS_SLM_DEV = [];
+    if (!is_void(_BNS_SLM_FD) && _BNS_SLM_FD >= 0) {
+        unx_close, _BNS_SLM_DEV;
+    }
 }
 
 func bns_slm_send_image(img)
