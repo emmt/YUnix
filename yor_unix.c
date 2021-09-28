@@ -61,8 +61,7 @@ static void yfd_extract(void*, char*);
 
 struct _yfd {
     char* path;
-    int ready;
-    int fd;
+    int fd; /* -1 if closed */
     unsigned int flags, mode;
 };
 
@@ -74,14 +73,11 @@ static void
 yfd_free(void* addr)
 {
     yfd_t* obj = (yfd_t*)addr;
-    if (obj->ready) {
-        obj->ready = 0;
-        if (obj->path != NULL) {
-            p_free(obj->path);
-        }
-        if (obj->fd >= 0) {
-            close(obj->fd);
-        }
+    if (obj->path != NULL) {
+        p_free(obj->path);
+    }
+    if (obj->fd >= 0) {
+        close(obj->fd);
     }
 }
 
@@ -92,37 +88,28 @@ yfd_print(void* addr)
     yfd_t* obj = (yfd_t*)addr;
 
     y_print(yfd_type.type_name, FALSE);
-    if (! obj->ready) {
-        y_print(" (uninitialized)", TRUE);
+    y_print(":", TRUE);
+    if (obj->path == NULL) {
+        y_print("  Path: NULL", TRUE);
     } else {
-        y_print(":", TRUE);
-        if (obj->path == NULL) {
-            y_print("  Path: NULL", TRUE);
-        } else {
-            y_print("  Path: \"", FALSE);
-            y_print(obj->path, FALSE);
-            y_print("\"", TRUE);
-        }
-        sprintf(buf, "%d", obj->fd);
-        y_print("  Number: ", FALSE);
-        y_print(buf, TRUE);
-        sprintf(buf, "0x%08x", obj->flags);
-        y_print("  Flags: ", FALSE);
-        y_print(buf, TRUE);
-        sprintf(buf, "%05o", obj->mode);
-        y_print("  Mode: ", FALSE);
-        y_print(buf, TRUE);
+        y_print("  Path: \"", FALSE);
+        y_print(obj->path, FALSE);
+        y_print("\"", TRUE);
     }
+    sprintf(buf, "%d", obj->fd);
+    y_print("  Number: ", FALSE);
+    y_print(buf, TRUE);
+    sprintf(buf, "0x%08x", obj->flags);
+    y_print("  Flags: ", FALSE);
+    y_print(buf, TRUE);
+    sprintf(buf, "%05o", obj->mode);
+    y_print("  Mode: ", FALSE);
+    y_print(buf, TRUE);
 }
 
 static void
 yfd_eval(void* addr, int argc)
 {
-    yfd_t* obj = (yfd_t*)addr;
-
-    if (! obj->ready) {
-        y_error("uninitialized file descriptor object");
-    }
     y_error("eval method not yet implemented");
 }
 
@@ -131,9 +118,6 @@ yfd_extract(void* addr, char* member)
 {
     yfd_t* obj = (yfd_t*)addr;
 
-    if (! obj->ready) {
-        y_error("uninitialized file descriptor object");
-    }
     switch ((member != NULL ? member[0] : '\0')) {
     case 'p':
         if (strcmp(member, "path") == 0) {
@@ -165,9 +149,8 @@ static yfd_t*
 fetch_file_descriptor(int iarg, int check)
 {
     yfd_t* obj = (yfd_t*)yget_obj(iarg, &yfd_type);
-    if (check) {
-        if (! obj->ready) y_error("uninitialized file descriptor object");
-        if (obj->fd < 0)  y_error("file descriptor has been closed");
+    if (check && obj->fd < 0) {
+        y_error("file descriptor has been closed");
     }
     return obj;
 }
@@ -213,7 +196,6 @@ Y_unx_open(int argc)
     obj->fd = -1;
     obj->flags = (unsigned int)ygets_i(argc - 1);
     obj->mode = (unsigned int)(argc >= 3 ? ygets_i(argc - 2) : 0);
-    obj->ready = TRUE;
     obj->path = p_native(path);
     obj->fd = open(obj->path, (int)obj->flags, (mode_t)obj->mode);
     if (obj->fd < 0) y_error(strerror(errno));
@@ -230,14 +212,12 @@ Y_unx_close(int argc)
     obj = fetch_file_descriptor(0, FALSE);
     path = obj->path;
     fd = obj->fd;
-    obj->ready = FALSE;
     p_free(path);
     obj->path = NULL;
     close(fd);
     obj->fd = -1;
     obj->flags = 0;
     obj->mode = 0;
-    obj->ready = TRUE;
 }
 
 void
