@@ -1,4 +1,4 @@
-The ioctl plug-in is licensed under the MIT "Expat" License:
+The `YUnix` plug-in is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2015-2016: Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>
 >
