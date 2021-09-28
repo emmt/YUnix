@@ -192,47 +192,47 @@ _UNX_IOC_READ      = 2n;
 
 func _UNX_IOC(dir, type, nr, size)
 {
-  return ((int(dir)  << _UNX_IOC_DIRSHIFT)  |
-          (int(type) << _UNX_IOC_TYPESHIFT) |
-          (int(nr)   << _UNX_IOC_NRSHIFT)   |
-          (int(size) << _UNX_IOC_SIZESHIFT));
+    return ((int(dir)  << _UNX_IOC_DIRSHIFT)  |
+            (int(type) << _UNX_IOC_TYPESHIFT) |
+            (int(nr)   << _UNX_IOC_NRSHIFT)   |
+            (int(size) << _UNX_IOC_SIZESHIFT));
 }
 
 /* used to create numbers */
 func _UNX_IO(type, nr) {
-  return _UNX_IOC(_UNX_IOC_NONE, type, nr, 0);
+    return _UNX_IOC(_UNX_IOC_NONE, type, nr, 0);
 }
 func _UNX_IOR(type, nr, size) {
-  return _UNX_IOC(_UNX_IOC_READ, type, nr, sizeof(size));
+    return _UNX_IOC(_UNX_IOC_READ, type, nr, sizeof(size));
 }
 func _UNX_IOW(type, nr, size) {
-  return _UNX_IOC(_UNX_IOC_WRITE, type, nr, sizeof(size));
+    return _UNX_IOC(_UNX_IOC_WRITE, type, nr, sizeof(size));
 }
 func _UNX_IOWR(type, nr, size) {
-  return _UNX_IOC(_UNX_IOC_READ|_UNX_IOC_WRITE, type, nr, sizeof(size));
+    return _UNX_IOC(_UNX_IOC_READ|_UNX_IOC_WRITE, type, nr, sizeof(size));
 }
 func _UNX_IOR_BAD(type, nr, size) {
-  return _UNX_IOC(_UNX_IOC_READ, type, nr, sizeof(size));
+    return _UNX_IOC(_UNX_IOC_READ, type, nr, sizeof(size));
 }
 func _UNX_IOW_BAD(type, nr, size) {
-  return _UNX_IOC(_UNX_IOC_WRITE, type, nr, sizeof(size));
+    return _UNX_IOC(_UNX_IOC_WRITE, type, nr, sizeof(size));
 }
 func _UNX_IOWR_BAD(type, nr, size) {
-  return _UNX_IOC(_UNX_IOC_READ|_UNX_IOC_WRITE, type, nr, sizeof(size));
+    return _UNX_IOC(_UNX_IOC_READ|_UNX_IOC_WRITE, type, nr, sizeof(size));
 }
 
 /* used to decode ioctl numbers.. */
 func _UNX_IOC_DIR(nr) {
-  return ((int(nr) >> _UNX_IOC_DIRSHIFT) & _UNX_IOC_DIRMASK);
+    return ((int(nr) >> _UNX_IOC_DIRSHIFT) & _UNX_IOC_DIRMASK);
 }
 func _UNX_IOC_TYPE(nr) {
-  return ((int(nr) >> _UNX_IOC_TYPESHIFT) & _UNX_IOC_TYPEMASK);
+    return ((int(nr) >> _UNX_IOC_TYPESHIFT) & _UNX_IOC_TYPEMASK);
 }
 func _UNX_IOC_NR(nr) {
-  return ((int(nr) >> _UNX_IOC_NRSHIFT) & _UNX_IOC_NRMASK);
+    return ((int(nr) >> _UNX_IOC_NRSHIFT) & _UNX_IOC_NRMASK);
 }
 func _UNX_IOC_SIZE(nr) {
-  return ((int(nr) >> _UNX_IOC_SIZESHIFT) & _UNX_IOC_SIZEMASK);
+    return ((int(nr) >> _UNX_IOC_SIZESHIFT) & _UNX_IOC_SIZEMASK);
 }
 
 /* ...and for the drivers/sound files... */
