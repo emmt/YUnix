@@ -14,7 +14,7 @@
 
 require, "unix.i";
 
-if (sizeof(int) != 4) error, "this code assume int is 32-bit integer";
+if (sizeof(int) != 4) error, "this code assume `int` is 32-bit integer";
 
 /*---------------------------------------------------------------------------*/
 /* IOCTL CODES */
@@ -62,34 +62,58 @@ write, format="BNS_SLM_STOP           = 0x%08x\n", BNS_SLM_STOP;
 
 local _BNS_SLM_FD;              // current file descriptor
 _BNS_SLM_DEV = "/dev/bns_slm0"; // default device name
-func bns_slm_open(dev)
+local bns_slm_close;
+func bns_slm_open(dev, lc_type=, frame_rate=)
 /* DOCUMENT bns_slm_open;
          or bns_slm_open, dev;
+         or bns_slm_close;
 
-     Open (or re-open) BNS SLM device.  The path to the device may be
-     specified by argument DEV.  A default device is used if DEV is
-     omitted.
+     Open (or re-open) BNS SLM device.  The path to the device may be specified
+     by argument `dev`.  A default device is used if `dev` is omitted.
 
      Currently a single BNS SLM device can be used at a time.
+
+     Keyword `lc_type` is to specify the liquid crystal type: 0 FLC (amplitude)
+     or 1 = Nematic (phase).  Default is 0.
+
+     Keyword `frame_rate` is to specify the frame-rate.  Default is 0x40008.
+
+     Call `bns_slm_close` to close the device.
 
    SEE ALSO: bns_slm_send_image.
  */
 {
-  // Open the device
-  extern _BNS_SLM_FD;
-  if (is_void(dev)) dev = _BNS_SLM_DEV;
-  _BNS_SLM_FD = unx_open(dev, UNX_O_RDWR);
+    if (is_void(lc_type)) {
+        lc_type = 0;
+    }
+    if (lc_type != 0 && lc_type != 1) {
+        error, "invalid value for keyword `lc_type`";
+    }
+    if (is_void(frame_rate)) {
+        frame_rate = 0x00040008;
+    }
 
-  // Set crystal type (0 = FLC, 1 = Nematic)
-  buf = [int(1)];
-  unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_LC_TYPE, buf;
+    // Open the device
+    extern _BNS_SLM_FD;
+    if (is_void(dev)) dev = _BNS_SLM_DEV;
+    _BNS_SLM_FD = unx_open(dev, UNX_O_RDWR);
 
-  // Set frame rate
-  buf = [int(0x00040008)];
-  unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_FRAME_RATE, buf;
+    // Set crystal type (0 = FLC, 1 = Nematic)
+    buf = [int(lc_type)];
+    unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_LC_TYPE, buf;
 
-  // Start with an empty image
-  bns_slm_send_image, array(char, 512, 512);
+    // Set frame rate
+    buf = [int(frame_rate)];
+    unx_ioctl, _BNS_SLM_FD, BNS_SLM_SET_FRAME_RATE, buf;
+
+    // Start with an empty image
+    bns_slm_send_image, array(char, 512, 512);
+}
+
+func bns_slm_close
+{
+    extern _BNS_SLM_FD;
+    _BNS_SLM_DEV = [];
 }
 
 func bns_slm_send_image(img)
@@ -103,12 +127,12 @@ func bns_slm_send_image(img)
    SEE ALSO: bns_slm_open
  */
 {
-  extern _BNS_SLM_FD;
-  if (is_void(_BNS_SLM_FD) || _BNS_SLM_FD.number < 0) {
-    bns_slm_open;
-  }
-  if (structof(img) != char || numberof(img) != 0x40000) {
-    error, "bad image type or size";
-  }
-  unx_ioctl, _BNS_SLM_FD, BNS_SLM_WRITE_IMAGE, img;
+    extern _BNS_SLM_FD;
+    if (is_void(_BNS_SLM_FD) || _BNS_SLM_FD.number < 0) {
+        bns_slm_open;
+    }
+    if (structof(img) != char || numberof(img) != 0x40000) {
+        error, "bad image type or size";
+    }
+    unx_ioctl, _BNS_SLM_FD, BNS_SLM_WRITE_IMAGE, img;
 }
