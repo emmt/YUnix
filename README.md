@@ -11,7 +11,7 @@ the name of the corresponding functions in the C library prefixed by `unx_`.
 Similarly, the names of the macros and constants are prefixed by `UNX_`.
 
 For instance:
-```{.cpp}
+```.cpp
 fd = unx_open(filename, UNX_O_RDONLY)
 loc = unx_lseek(fd, off, UNX_SEEK_CUR);
 ```
@@ -42,12 +42,12 @@ Installation
 ------------
 
 In short, building and installing the plug-in can be as quick as:
-````{.sh}
+```.sh
 cd $BUILD_DIR
 $SRC_DIR/configure
 make
 make install
-````
+```
 where `$BUILD_DIR` is the build directory (at your convenience) and
 `$SRC_DIR` is the source directory of the plug-in code.  The build and
 source directories can be the same in which case, call `./configure` to
@@ -56,13 +56,13 @@ configure for building.
 If the plug-in has been properly installed, it is sufficient to use any
 function of YFITSIO to automatically load the plug-in.  You may force the
 loading of the plug-in by something like:
-````{.cpp}
+```.cpp
 #include "unix.i"
-````
+```
 or
-````{.cpp}
+```.cpp
 require, "unix.i";
-````
+```
 in your code.
 
 More detailled installation explanations are given below.
@@ -75,36 +75,36 @@ More detailled installation explanations are given below.
 
    For an **in-place build**, go to the source directory, say `$SRC_DIR`, of
    the plug-in code and run the configuration script:
-   ````{.sh}
+   ```.sh
    cd $SRC_DIR
    ./configure
-   ````
+   ```
    To see the configuration options, type:
-   ````{.sh}
+   ```.sh
    ./configure --help
-   ````
+   ```
 
    To compile in a **different build directory**, say `$BUILD_DIR`, create the
    build directory, go to the build directory and run the configuration
    script:
-   ````{.sh}
+   ```.sh
    mkdir -p $BUILD_DIR
    cd $BUILD_DIR
    $SRC_DIR/configure
-   ````
+   ```
    where `$SRC_DIR` is the path to the source directory of the plug-in code.
    To see the configuration options, type:
-   ````{.sh}
+   ```.sh
    $SRC_DIR/configure --help
-   ````
+   ```
 
 4. Compile the code:
-   ````{.sh}
+   ```.sh
    make clean
    make
-   ````
+   ```
 
 5. Install the plug-in in Yorick directories:
-   ````{.sh}
+   ```.sh
    make install
-   ````
+   ```

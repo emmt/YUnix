@@ -4,7 +4,9 @@
 #
 #------------------------------------------------------------------------------
 #
-# Copyright (C) 2015: Éric Thiébaut <eric.thiebaut@univ-lyon1.fr>
+# This file is licensed under the MIT "Expat" License.
+#
+# Copyright (C) 2015-2018, Éric Thiébaut <https://github.com/emmt/YPlugin>
 #
 #------------------------------------------------------------------------------
 
@@ -29,37 +31,10 @@ trap cfg_on_exit 0
 
 cfg_progname=$0
 cfg_srcdir=$(dirname "$0")
-#cfg_path=$(readlink -fn "$@")
-#cfg_srcdir=$(dirname "$cfg_path")
 
 cfg_die () { echo >&2 "$cfg_progname: $*"; exit 1; }
 
-cfg_opt_value () { echo "$*" | sed -e 's/^--[^=]*=//'; }
-
-cfg_despace () { echo "$*" | sed -e 's/ /\\ /g'; }
-
-cfg_add_rule () {
-    local s t
-    s=$*
-    for t in "/" "%" "@" "," "-"; do
-        case "$s" in
-            *$t* )
-                ;;
-            * )
-                break
-        esac
-    done
-    if test "$t" = "-"; then
-        cfg_die "No valid separator found"
-    fi
-    s='[ 	]*'
-    s="s${t}^${s}${1}${s}=.*${t}${1}=${2}${t}"
-    if test "x$cfg_filter" = "x"; then
-        cfg_filter="$s"
-    else
-        cfg_filter="$cfg_filter;$s"
-    fi
-}
+cfg_opt_value () { echo "$*" | sed -e 's/^[^=]*=//'; }
 
 cfg_help () {
     cat <<EOF
@@ -76,12 +51,6 @@ options:
   -h, --help           Print this help and exit.
 EOF
 }
-
-if cmp -s "./Makefile" "$cfg_srcdir/Makefile"; then
-    cfg_inplace=yes
-else
-    cfg_inplace=no
-fi
 
 cfg_os=$(uname -s | tr A-Z a-z)
 if test "x$cfg_os" = "x"; then
@@ -166,41 +135,27 @@ EOF
 
 cfg_yhome=$(sed < "$cfg_tmpfile" -e '/^Y_HOME=/!d;s/^Y_HOME=//')
 cfg_ysite=$(sed < "$cfg_tmpfile" -e '/^Y_SITE=/!d;s/^Y_SITE=//')
-cfg_ymkdir=$cfg_yhome
+
+echo >&2 "Yorick executable --------> $cfg_yorick"
 echo >&2 "Yorick home directory ----> $cfg_yhome"
 echo >&2 "Yorick site directory ----> $cfg_ysite"
 
 # Create the Makefile.
-cfg_dst="./Makefile"
-if test "$cfg_inplace" = "yes"; then
-    cfg_src="$cfg_dst.bak"
-    mv -f "$cfg_dst" "$cfg_src"
+sed <"${cfg_srcdir}"/Makefile.in >Makefile.tmp \
+    -e "s|@srcdir@|$cfg_srcdir|g" \
+    -e "s|@YORICK_EXE@|$cfg_yorick|g" \
+    -e "s|@YORICK_MAKEDIR@|$cfg_yhome|g" \
+    -e "s|@YORICK_HOME@|$cfg_yhome|g" \
+    -e "s|@YORICK_SITE@|$cfg_ysite|g" \
+    -e "s|@PKG_CFLAGS@|$cfg_cflags|g" \
+    -e "s|@PKG_LDFLAGS@|$cfg_ldflags|g" \
+    -e "s|@PKG_DEPLIBS@|$cfg_deplibs|g"
+if cmp -s Makefile.tmp Makefile 2>/dev/null; then
+    echo "Makefile has not changed."
+    rm -f Makefile.tmp
 else
-    cfg_src="$cfg_srcdir/Makefile"
+    rm -f Makefile
+    mv Makefile.tmp Makefile
+    echo "Makefile has been created."
 fi
-
-cfg_filter=""
-cfg_add_rule "Y_EXE"       "$cfg_yorick"
-cfg_add_rule "Y_MAKEDIR"   "$cfg_ymkdir"
-cfg_add_rule "Y_EXE_HOME"  "$cfg_yhome"
-cfg_add_rule "Y_EXE_SITE"  "$cfg_ysite"
-cfg_add_rule "PKG_CFLAGS"  "$cfg_cflags"
-cfg_add_rule "PKG_DEPLIBS" "$cfg_deplibs"
-cfg_add_rule "PKG_LDFLAGS" "$cfg_ldflags"
-cfg_add_rule "srcdir"      "$cfg_srcdir"
-sed < "$cfg_src" > "$cfg_dst" -e "$cfg_filter"
-
-if test "$cfg_inplace" = "yes"; then
-    rm -f "$cfg_src"
-fi
-
-echo "Makefile has been updated."
 echo "You can run 'make' and 'make install' now."
-
-# Local Variables:
-# mode: sh
-# tab-width: 8
-# indent-tabs-mode: nil
-# fill-column: 78
-# coding: utf-8
-# End:

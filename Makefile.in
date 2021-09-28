@@ -1,50 +1,59 @@
 # where are the sources? (automatically filled in by configure script)
-srcdir=.
+srcdir = @srcdir@
 
 # these values filled in by "yorick -batch make.i" or configure script
-Y_MAKEDIR=
-Y_EXE=
-Y_EXE_PKGS=
-Y_EXE_HOME=
-Y_EXE_SITE=
-Y_HOME_PKG=
+Y_MAKEDIR = @YORICK_MAKEDIR@
+Y_EXE = @YORICK_EXE@
+Y_EXE_PKGS =
+Y_EXE_HOME = @YORICK_HOME@
+Y_EXE_SITE = @YORICK_SITE@
+Y_HOME_PKG =
 
 # ----------------------------------------------------- optimization flags
 
 # options for make command line, e.g.-   make COPT=-g TGT=exe
-COPT=$(COPT_DEFAULT)
-TGT=$(DEFAULT_TGT)
+COPT = $(COPT_DEFAULT)
+TGT = $(DEFAULT_TGT)
 
 # ------------------------------------------------ macros for this package
 
-PKG_NAME=yor_unix
-PKG_I=${srcdir}/unix.i
+PKG_NAME = yor_unix
+PKG_I = $(srcdir)/unix.i
 
-OBJS=yor_unix.o
+OBJS = yor_unix.o
 
 # change to give the executable a name other than yorick
-PKG_EXENAME=yorick
+PKG_EXENAME = yorick
 
-# PKG_DEPLIBS=-Lsomedir -lsomelib   for dependencies of this package
-PKG_DEPLIBS=
-# set compiler (or rarely loader) flags specific to this package
-PKG_CFLAGS=
-PKG_LDFLAGS=
+# PKG_DEPLIBS = -Lsomedir -lsomelib   for dependencies of this package
+PKG_DEPLIBS = @PKG_DEPLIBS@
+
+# C compiler, compiler (or rarely loader) flags specific to this package
+PKG_CC = @PKG_CC@
+PKG_CFLAGS = -I$(srcdir) @PKG_CFLAGS@
+PKG_LDFLAGS = @PKG_LDFLAGS@
 
 # list of additional package names you want in PKG_EXENAME
 # (typically $(Y_EXE_PKGS) should be first here)
-EXTRA_PKGS=$(Y_EXE_PKGS)
+EXTRA_PKGS = $(Y_EXE_PKGS)
 
 # list of additional files for clean
-PKG_CLEAN=
+PKG_CLEAN = config.log
 
 # autoload file for this package, if any
-PKG_I_START=${srcdir}/unix-start.i
+PKG_I_START = $(srcdir)/unix-start.i
 # non-pkg.i include files for this package, if any
-PKG_I_EXTRA=
+PKG_I_EXTRA = $(srcdir)/bns_slm.i
 
-RELEASE_FILES = AUTHORS LICENSE.md Makefile NEWS README.md \
-	configure unix.i unix-start.i yor_unix.c
+RELEASE_FILES = \
+    LICENSE.md \
+    Makefile.in \
+    README.md \
+    configure \
+    unix.i \
+    unix-start.i \
+    yor_unix.c \
+    bns_slm.i
 RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 
 # -------------------------------- standard targets and rules (in Makepkg)
@@ -53,16 +62,12 @@ RELEASE_NAME = $(PKG_NAME)-$(RELEASE_VERSION).tar.bz2
 # DLL_TARGETS, LIB_TARGETS, EXE_TARGETS
 # are any additional targets (defined below) prerequisite to
 # the plugin library, archive library, and executable, respectively
-PKG_I_DEPS=$(PKG_I)
-Y_DISTMAKE=distmake
+PKG_I_DEPS = $(PKG_I)
+Y_DISTMAKE = distmake
 
-ifeq (,$(strip $(Y_MAKEDIR)))
-$(info *** WARNING: Y_MAKEDIR not defined, you may run 'yorick -batch make.i' first)
-else
 include $(Y_MAKEDIR)/Make.cfg
 include $(Y_MAKEDIR)/Makepkg
 include $(Y_MAKEDIR)/Make$(TGT)
-endif
 
 # override macros Makepkg sets for rules and other macros
 # see comments in Y_HOME/Makepkg for a list of possibilities
@@ -84,8 +89,11 @@ MAKE_TEMPLATE = protect-against-1.5
 dummy-default:
 	@echo >&2 "*** ERROR: Y_MAKEDIR not defined, aborting..."; false
 
-%.o: ${srcdir}/%.c
+%.o: $(srcdir)/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ -c $<
+
+distclean::
+	rm -f Makefile
 
 # simple example:
 #myfunc.o: myapi.h
