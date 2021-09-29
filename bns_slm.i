@@ -62,11 +62,12 @@ write, format="BNS_SLM_STOP           = 0x%08x\n", BNS_SLM_STOP;
 
 local _BNS_SLM_FD;              // current file descriptor
 _BNS_SLM_DEV = "/dev/bns_slm0"; // default device name
-local bns_slm_close;
+local bns_slm_close, bns_slm_is_open;
 func bns_slm_open(dev, lc_type=, frame_rate=)
 /* DOCUMENT bns_slm_open;
          or bns_slm_open, dev;
          or bns_slm_close;
+         or bns_slm_is_open();
 
      Open (or re-open) BNS SLM device.  The path to the device may be specified
      by argument `dev`.  A default device is used if `dev` is omitted.
@@ -80,9 +81,12 @@ func bns_slm_open(dev, lc_type=, frame_rate=)
 
      Call `bns_slm_close` to close the device.
 
+     Call `bns_slm_is_open()` to check whether the device is already open.
+
    SEE ALSO: bns_slm_send_image.
  */
 {
+    // Set options and check whether the device is already open.
     if (is_void(lc_type)) {
         lc_type = 0;
     }
@@ -92,11 +96,16 @@ func bns_slm_open(dev, lc_type=, frame_rate=)
     if (is_void(frame_rate)) {
         frame_rate = 0x00040008;
     }
+    if (is_void(dev)) {
+        dev = _BNS_SLM_DEV;
+    }
 
-    // Open the device
-    extern _BNS_SLM_FD;
-    if (is_void(dev)) dev = _BNS_SLM_DEV;
-    _BNS_SLM_FD = unx_open(dev, UNX_O_RDWR);
+    // Open the device.
+    if (is_void(_BNS_SLM_FD) || _BNS_SLM_FD.number < 0) {
+        _BNS_SLM_FD = unx_open(dev, UNX_O_RDWR);
+    } else {
+        error, "device is already open, call `bns_slm_close` first";
+    }
 
     // Set crystal type (0 = FLC, 1 = Nematic)
     buf = [int(lc_type)];
@@ -113,9 +122,12 @@ func bns_slm_open(dev, lc_type=, frame_rate=)
 func bns_slm_close
 {
     extern _BNS_SLM_FD;
-    if (!is_void(_BNS_SLM_FD) && _BNS_SLM_FD >= 0) {
-        unx_close, _BNS_SLM_DEV;
-    }
+    _BNS_SLM_FD = [];
+}
+
+func bns_slm_is_open(nil)
+{
+    return !(is_void(_BNS_SLM_FD) || _BNS_SLM_FD.number < 0);
 }
 
 func bns_slm_send_image(img)
@@ -129,7 +141,6 @@ func bns_slm_send_image(img)
    SEE ALSO: bns_slm_open
  */
 {
-    extern _BNS_SLM_FD;
     if (is_void(_BNS_SLM_FD) || _BNS_SLM_FD.number < 0) {
         bns_slm_open;
     }
